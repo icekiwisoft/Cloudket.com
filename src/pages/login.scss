@@ -1,0 +1,58 @@
+.login
+{
+    height: 100%;
+    background-color: #eee9;
+    width: 100%;
+    backdrop-filter: blur(30px);
+    display: flex;
+    .loginwrapper
+    {
+        display: flex;
+        background-color: #fff7;
+        margin: auto;
+        form 
+        {
+            
+            width: 300px;
+            flex-direction: column;
+            padding: 10px 20px;
+            align-items: center;
+            img
+            {
+                width: 60px;
+            }
+            > input
+        {
+            background-color:#fff7;
+            margin: 10px;
+            border-radius: 5PX;
+            border: none;
+            padding: 20px;
+            width: 100%;
+        }
+        button
+        {
+            background-color: rgb(199, 0, 99)!important;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 100%;
+        
+        
+        }
+        
+        
+        }
+        
+    }
+
+
+}
+
+
+
+
+
+
+
