@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import ServerNavigation, { Settings } from "../components/server/servernavigation";
 import ServerRoom from "../components/server/serverroom";
-export default function Server() 
-{
-    const [settings,setsettings]=useState(false)
-
-    
+import AuthContext from "../context/authcontext";
+export default function Server() {
+    const [settings, setsettings] = useState(false)
+    const [searchfolder, setsearchfolder] = useState(false)
+    let { settheme, theme } = useContext(AuthContext);
     return (
-        <div  className="content">
-            <ServerNavigation setsettings={setsettings}/>
-            <ServerRoom/>
+        <div className={"content" + ((theme) ? " light" : '')}>
+            <ServerNavigation searchfolder={searchfolder} setsearchfolder={setsearchfolder} setsettings={setsettings} />
+            <ServerRoom setsearchfolder={setsearchfolder} />
             {
-                (settings)&&(
-                    <Settings/>
+                (settings) && (
+                    <Settings />
                 )
             }
 

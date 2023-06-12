@@ -1,9 +1,9 @@
-import { faFolder, faAdd, faRecycle, faFileLines, faFolderOpen } from "@fortawesome/free-solid-svg-icons"
+import { faFolder, faAdd, faRecycle, faFileLines, faFolderOpen, faEllipsisVertical, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { useEffect, useRef, useState } from "react"
 import defaultback from '../../assets/defaultback.jpg'
 import { Link, useParams } from "react-router-dom"
-import axios from "axios"
+import dayjs from "dayjs"
 import foldericon from '../../assets/folder.png'
 import texticon from '../../assets/text.png'
 import videoicon from '../../assets/video.png'
@@ -11,10 +11,11 @@ import imageicon from '../../assets/image.png'
 import wordicon from '../../assets/word.png'
 
 import Player from "./videoplayer"
+import useAxios from "../../utils/useAxios"
 
 
 
-function Serverheader() {
+function Serverheader({ setsearchfolder }) {
   const [crttime, setcrttime] = useState("")
 
   window.setInterval(() => {
@@ -29,25 +30,58 @@ function Serverheader() {
         {crttime}
       </span>
 
-      <form>
-        <input type="search" placeholder="Search..." />
-      </form>
+      <div className="tools">
+        <button><FontAwesomeIcon size="2x" icon={faSearch} onClick={() => setsearchfolder(true)} /></button>
+        <button><FontAwesomeIcon size="2x" icon={faEllipsisVertical} /></button>
+      </div>
     </div>
   )
 }
-export default function ServerRoom() {
+
+
+function RenameDialog(props) {
+  const [crttime, setcrttime] = useState("")
+
+
+  return (
+    <div className="dialog-wrapper">
+      <div className="dialog">
+
+      </div>
+    </div>
+  )
+}
+
+
+
+function CreateServerDialog(props) {
+  const [crttime, setcrttime] = useState("")
+
+
+  return (
+    <div className="dialog-wrapper">
+      <div className="dialog">
+
+      </div>
+    </div>
+  )
+}
+export default function ServerRoom(props) {
   const fileshooserref = useRef(1)
   const { id, folderid } = useParams()
   const [folders, setfolders] = useState([])
+  const [folderdetail, setfolderdetail] = useState()
   const [files, setfiles] = useState([])
-  const [player, setplayer] = useState(0)
-
+  const [player, setplayer] = useState(-1)
+  const [userserverinfo, setuserserverinfo] = useState({})
   const [serverinfo, setserverinfo] = useState({})
   const [context, setContext] = useState(false);
   const [foldercontext, setfoldercontext] = useState(-1);
+  const [filecontext, setfilecontext] = useState(-1);
+  const { setsearchfolder } = props
 
   const [xYPosistion, setXyPosistion] = useState({ x: 0, y: 0 });
-
+  const axios = useAxios()
   const showfoldercontext = (event, folderid) => {
     event.preventDefault();
     setContext(false);
@@ -59,6 +93,20 @@ export default function ServerRoom() {
     };
     setXyPosistion(positionChange);
     setfoldercontext(folderid);
+  };
+
+
+  const showfilecontext = (event, fileid) => {
+    event.preventDefault();
+    setContext(false);
+
+    const positionChange = {
+      x: event.pageX,
+      y: event.pageY,
+    };
+    setXyPosistion(positionChange);
+    setfilecontext(fileid);
+    console.log(fileid)
   };
 
   const showcontext = (event) => {
@@ -75,42 +123,60 @@ export default function ServerRoom() {
   const hideContext = (event) => {
     setContext(false);
     setfoldercontext(-1)
+    setfilecontext(-1)
   };
 
-  const [chosen, setChosen] = useState();
-  const initMenu = (chosen) => {
-    setChosen(chosen);
-  };
+  const [detail, setdetail] = useState(undefined);
+  const getdetail = async (f) => {
+    const folder = await axios.get(`http://localhost:8000/${id}/folders/${f}`)
 
+    setdetail(folder.data)
 
-  const update = (!folderid) ?
+  }
+
+  const updateuserserverinfo = () => {
+    axios.get(`http://localhost:8000/${id}/userinfo`).then(result => {
+      setuserserverinfo(result.data)
+
+      console.log(result.data)
+    })
+
+  }
+
+  useEffect(() => {
+    updateuserserverinfo()
+  }
+    , [id]
+  )
+
+  const update =
     async () => {
       const { data } = await axios.get(`http://localhost:8000/${id}`)
-      console.log(data)
       setserverinfo(data)
-      console.log(serverinfo)
-      const folders = await axios.get(`http://localhost:8000/${id}/folders/${data.mainfolder}`)
-      const files = await axios.get(`http://localhost:8000/${id}/folders/${data.mainfolder}/files`)
+      const folders = await axios.get(`http://localhost:8000/${id}/folders${(folderid) ? "?parent=" + folderid : ''}`)
+      setfolders(folders.data)
+      const files = await axios.get(`http://localhost:8000/${id}/files${(folderid) ? "?parent=" + folderid : ''}`)
+      if (folderid) {
+        const folder = await axios.get(`http://localhost:8000/${id}/folders/${folderid}`)
+        setfolderdetail(folder.data)
+        console.log(folder.data)
+      }
 
       setfiles(files.data)
-      setfolders(folders.data)
-    }
-    :
-    async () => {
-      const folders = await axios.get(`http://localhost:8000/${id}/folders/${folderid}`)
-      setfolders(folders.data)
-      const files = await axios.get(`http://localhost:8000/${id}/folders/${folderid}/files`)
-      setfiles(files.data)
+
+
     }
 
   useEffect(() => {
+
     update()
   }, [id, folderid])
 
   const newfolder = async () => {
 
+    console.log(folderid)
     await axios.post(`http://127.0.0.1:8000/${id}/folders/create`, {
-      parent: folderid || serverinfo.mainfolder
+      parent: folderid
     })
     update()
   }
@@ -121,7 +187,7 @@ export default function ServerRoom() {
     var file = new Blob(["hello  j'ai des enfant"], { type: "text/plain" });
     formData.append("file", file)
     formData.append("name", "new file")
-    formData.append("folder", folderid || serverinfo.mainfolder)
+    formData.append("parent", folderid || -1)
 
 
     await axios.post(`http://127.0.0.1:8000/${id}/files/create`,
@@ -131,26 +197,15 @@ export default function ServerRoom() {
   }
 
 
-  console.log(files)
   const uploadfile = async (e) => {
-    console.log("ok")
 
     let formData = new FormData();
-
+    console.log(e.target.files[0])
     formData.append("file", e.target.files[0])
-    formData.append("name", "video")
-    formData.append("folder", folderid || serverinfo.mainfolder)
+    formData.append("name", e.target.files[0].name)
+    formData.append("parent", folderid || -1)
 
-    await axios({
-      url: `http://127.0.0.1:8000/${id}/files/create`,
-      method: "POST",
-      Headers: {
-        authorization: "token"
-      },
-      data: formData
-
-
-    })
+    await axios.post(`http://127.0.0.1:8000/${id}/files/create`, formData)
 
 
     update()
@@ -163,9 +218,10 @@ export default function ServerRoom() {
 
   }
 
-  const deletefolder = async (folder) => {
+  const deleteitem = async () => {
 
-    await axios.delete(`http://127.0.0.1:8000/${id}/folders/${folder}`)
+
+    (foldercontext != -1) ? await axios.delete(`http://127.0.0.1:8000/${id}/folders/${foldercontext}`) : await axios.delete(`http://127.0.0.1:8000/${id}/files/${filecontext}`)
     update()
   }
 
@@ -210,114 +266,181 @@ export default function ServerRoom() {
     URL.revokeObjectURL(href);
   }
 
+  const joinserver = async () => {
+    await axios.get(`http://localhost:8000/${id}/join`)
+    updateuserserverinfo()
+  }
 
+  const quitserver = async () => {
+    await axios.delete(`http://localhost:8000/${id}/userinfo`)
+    updateuserserverinfo()
+  }
+
+  console.log(serverinfo.icon)
   return (
-    <div className="room" onClick={hideContext} style={{ backgroundImage: `url(${defaultback})` }}  >
-      <Serverheader />
-      <div className="roomdata" onContextMenu={showcontext} >
-        {
-          folders.map(f => {
+    <div className="room light" onClick={hideContext}  >
+      <Serverheader setsearchfolder={setsearchfolder} />
+      <div className="roommain" >
+        <div className="xxx" onContextMenu={showcontext}>
+          <div className="roomdata"  >
+            {
+              folders.map(f => {
 
-            return (
-              <Link onContextMenu={(e) => { showfoldercontext(e, f.id) }} className="data" to={'/' + id + '/' + f.id}>
-                <img src={foldericon} width={64} alt={f.name} />
-                <span className="name">{f.name}</span>
-              </Link>
+                return (
+                  <Link onContextMenu={(e) => { showfoldercontext(e, f.id) }} className="data" to={'/' + id + '/' + f.id}>
+                    <img src={foldericon} width={64} alt={f.name} />
+                    <span className="name">{f.name}</span>
+                  </Link>
 
-            )
-          })
-
-
-        }
+                )
+              })
 
 
-        {
-          files.map(f => {
-
-            var icon
-
-            if (f.type.includes("video")) {
-              icon = videoicon
             }
-            else if (f.type.includes("image")) {
-              icon = imageicon
+
+            {
+
+              files.map((f, i) => {
+
+                var icon
+
+                if (f.type.includes("video")) {
+                  icon = videoicon
+                }
+                else if (f.type.includes("image")) {
+                  icon = imageicon
+                }
+                else if (f.type.includes("word")) {
+                  icon = wordicon
+                }
+                else {
+                  icon = texticon
+                }
+                return (
+                  <a href="#" className="data" onContextMenu={(e) => { showfilecontext(e, f.id) }} onClick={() => { setplayer(i) }}>
+                    <img src={icon} width={64} alt={f.name} />
+                    <span className="name">{f.name}</span>
+                  </a>
+
+                )
+              })
+
+
             }
-            else if (f.type.includes("word")) {
-              icon = imageicon
-            }
-            else {
-              icon = texticon
-            }
-            return (
-              <a href="#" className="data" onClick={() => { download("http://localhost:8000" + f.file, f.name) }}>
-                <img src={icon} width={64} alt={f.name} />
-                <span className="name">{f.name}</span>
-              </a>
-
-            )
-          })
-
-
-        }
 
 
 
-        {context && (
-          <div
-            style={{ top: xYPosistion.y, left: xYPosistion.x }}
-            className="contextmenu"
-          >
-            <div className="menuElement" onClick={newfolder}>
-              new folder
+            {context && (
+              <div
+                style={{ top: xYPosistion.y, left: xYPosistion.x }}
+                className="contextmenu"
+              >
+                <div className="menuElement" onClick={newfolder}>
+                  new folder
+                </div>
+                <div className="menuElement" onClick={'() => initMenu("updfolder")'}>
+                  upload folder
+                </div>
+                <div className="menuElement" onClick={() => { fileshooserref.current.click() }}>
+                  upload file
+                </div>
+                <div className="menuElement" onClick={newfile}>
+                  new file
+                </div>
+                <div className="menuElement" onClick={''}>
+                  Paste
+                </div>
+              </div>
+            )}
+
+            {(foldercontext !== -1 || filecontext !== -1) && (
+              <div
+                style={{ top: xYPosistion.y, left: xYPosistion.x }}
+                className="contextmenu"
+              >
+                <div className="menuElement" onClick={(e) => { deleteitem() }}>
+                  delete
+                </div>
+                <div className="menuElement" onClick={''}>
+                  cut
+                </div>
+                <div className="menuElement" onClick={''}>
+                  rename
+                </div>
+                <div className="menuElement" onClick={() => getdetail(foldercontext)}>
+                  detail
+                </div>
+              </div>
+            )}
+
+            <div>
+
+              <input type="file" style={{ display: "none" }} onChange={uploadfile} ref={fileshooserref} />
+
+
             </div>
-            <div className="menuElement" onClick={() => initMenu("updfolder")}>
-              upload folder
-            </div>
-            <div className="menuElement" onClick={() => { fileshooserref.current.click() }}>
-              upload file
-            </div>
-            <div className="menuElement" onClick={newfile}>
-              new file
-            </div>
-            <div className="menuElement" onClick={() => initMenu("Paste")}>
-              Paste
-            </div>
+
           </div>
-        )}
 
-        {foldercontext != -1 && (
-          <div
-            style={{ top: xYPosistion.y, left: xYPosistion.x }}
-            className="contextmenu"
-          >
-            <div className="menuElement" onClick={(e) => { deletefolder(foldercontext); console.log(foldercontext) }}>
-              delete
-            </div>
-            <div className="menuElement" onClick={() => initMenu("updfolder")}>
-              cut
-            </div>
-            <div className="menuElement" onClick={() => initMenu("updfile")}>
-              rename
-            </div>
-            <div className="menuElement" onClick={() => initMenu("Paste")}>
-              detail
-            </div>
+          <div className="bottombar">
+            {
+              !userserverinfo.role ? (
+                <button className="join" onClick={joinserver}>Join Server</button>) :
+                (
+                  <button className="quit" onClick={quitserver}>quit Server</button>)
+
+
+            }
           </div>
-        )}
-
-        <div>
-
-          <input type="file" style={{ display: "none" }} onChange={uploadfile} ref={fileshooserref} />
-
-
         </div>
 
+        <div className="details">
+          {
+            folderdetail ?
+              (
+                <>
+
+
+                  <img src={foldericon} alt="folder" />
+
+                  <div className="informations">
+                    <span>name : <i>{folderdetail.name}</i></span>
+                    <span> creation date: <i>{dayjs(folderdetail.creationdate).format('YYYY-MM-DD')}</i></span>
+                    <span>author : <i>{folderdetail.author.username}</i></span>
+                    <span></span>
+                  </div>
+                </>
+
+              )
+
+              :
+              (
+                <>
+
+
+                  <img src={"http://127.0.0.1:8000" + serverinfo.icon} alt="folder" />
+
+                  <div className="informations">
+                    <span>name : <i>{serverinfo.name}</i></span>
+                    <span> creation date: <i>{dayjs(serverinfo.creationdate).format('YYYY-MM-DD')}</i></span>
+                    <span></span>
+                  </div>
+                </>
+
+              )
+          }
+
+        </div>
       </div>
 
 
+
+
       {
-        (player != -1) && (
+        (player !== -1) &&
+        (files.length > 0 && (
           <Player files={files} file={player} setfile={setplayer} />
+        )
         )
       }
     </div>

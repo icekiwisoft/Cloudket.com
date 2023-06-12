@@ -1,24 +1,29 @@
-import logo from './logo.svg';
 import './App.scss';
 import Server from './pages/server';
 import Login from './pages/login';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Register from './pages/register';
+import PrivateRoute from './utils/PrivateRoute';
+import { AuthProvider } from './context/authcontext';
+import Logout from './pages/logout';
 
 function App() {
   return (
 
     <BrowserRouter >
-    <Routes>
-    <Route path='/' element={<Server/>}/>
-    <Route path='/:id' element={<Server/>}/>
-    <Route path='/:id/:folderid' element={<Server/>}/>
+      <AuthProvider>
+        <Routes>
 
+          <Route path='/' element={<PrivateRoute><Server /></PrivateRoute>} />
+          <Route path='/:id' element={<PrivateRoute><Server /></PrivateRoute>} />
+          <Route path='/:id/:folderid' element={<PrivateRoute><Server /></PrivateRoute>} />
 
-    <Route path='login' element={<Login/>}/>
+          <Route path='/register' element={<Register />} />
 
-    
-    </Routes>
-
+          <Route path='/login' element={<Login />} />
+          <Route path='/logout' element={<Logout />} />
+        </Routes>
+      </AuthProvider>
     </BrowserRouter>
 
   );
