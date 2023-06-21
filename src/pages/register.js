@@ -50,10 +50,10 @@ export default function Register() {
                     <form>
 
 
-                        <input type='text' id="username" onChange={(e) => setusername(e.target.value)} />
-                        <input type='email' id='email' onChange={(e) => setemail(e.target.value)} />
-                        <input type='password' id='password' onChange={(e) => setPassword(e.target.value)} />
-                        <input type='password' id='password2' onChange={(e) => setPassword2(e.target.value)} />
+                        <input type='text' id="username" placeholder='user name' onChange={(e) => setusername(e.target.value)} />
+                        <input type='email' id='email' placeholder='email' onChange={(e) => setemail(e.target.value)} />
+                        <input type='password' id='password' placeholder='password' onChange={(e) => setPassword(e.target.value)} />
+                        <input type='password' id='password2' placeholder='password (validation)' onChange={(e) => setPassword2(e.target.value)} />
                         <button className='reg' onClick={handleSubmit}>register</button>
                         <span>already have an account <Link to={'login'}>login  now</Link></span>
                     </form>

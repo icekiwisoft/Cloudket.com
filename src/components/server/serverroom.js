@@ -40,13 +40,24 @@ function Serverheader({ setsearchfolder }) {
 
 
 function RenameDialog(props) {
-  const [crttime, setcrttime] = useState("")
-
-
+  const axios = useAxios()
+  const { serverid, renameobject, setrenameobject, setrenamedialog } = props
+  const [value, setvalue] = useState("")
+  console.log("file :" + renameobject.id)
+  const handleclose = () => {
+    setrenameobject({})
+  }
   return (
-    <div className="dialog-wrapper">
-      <div className="dialog">
+    <div className="dialog-wrapper" onClick={handleclose}>
+      <div className="dialog" onClick={(e) => { e.stopPropagation() }}>
 
+        <div className="form-input">
+          <input type="text" placeholder="name" onChange={(e) => setvalue(e.target.value)} />
+        </div>
+        <div className="form-input">
+          <button onClick={() => setrenameobject(value)}> rename</button>
+
+        </div>
       </div>
     </div>
   )
@@ -54,18 +65,6 @@ function RenameDialog(props) {
 
 
 
-function CreateServerDialog(props) {
-  const [crttime, setcrttime] = useState("")
-
-
-  return (
-    <div className="dialog-wrapper">
-      <div className="dialog">
-
-      </div>
-    </div>
-  )
-}
 export default function ServerRoom(props) {
   const fileshooserref = useRef(1)
   const { id, folderid } = useParams()
@@ -78,6 +77,7 @@ export default function ServerRoom(props) {
   const [context, setContext] = useState(false);
   const [foldercontext, setfoldercontext] = useState(-1);
   const [filecontext, setfilecontext] = useState(-1);
+  const [renameobject, setrenameobject] = useState({})
   const { setsearchfolder } = props
 
   const [xYPosistion, setXyPosistion] = useState({ x: 0, y: 0 });
@@ -94,7 +94,20 @@ export default function ServerRoom(props) {
     setXyPosistion(positionChange);
     setfoldercontext(folderid);
   };
+  const setrenamedialog = async (name) => {
+    let url = (renameobject.file) ?
+      `http://localhost:8000/${id}/files/${renameobject.id}`
+      :
 
+      `http://localhost:8000/${id}/folders/${renameobject.id}`
+    axios.patch(url, {
+      name: name
+    })
+
+    setrenameobject({})
+    update()
+
+  }
 
   const showfilecontext = (event, fileid) => {
     event.preventDefault();
@@ -128,7 +141,7 @@ export default function ServerRoom(props) {
 
   const [detail, setdetail] = useState(undefined);
   const getdetail = async (f) => {
-    const folder = await axios.get(`http://localhost:8000/${id}/folders/${f}`)
+    const folder = await axios.get(`http:  console.log(downloadurl)//localhost:8000/${id}/folders/${f}`)
 
     setdetail(folder.data)
 
@@ -226,7 +239,9 @@ export default function ServerRoom(props) {
   }
 
 
-  const renamefolder = async () => {
+  const rename = () => {
+    console.log(foldercontext || filecontext)
+    setrenameobject({ id: (foldercontext !== -1) ? foldercontext : filecontext, file: filecontext !== -1 })
 
   }
 
@@ -240,30 +255,35 @@ export default function ServerRoom(props) {
   }
 
 
-  const download = async (downloadurl, name) => {
+  const download = async () => {
 
-    console.log(downloadurl)
-    const response = await axios(
-      {
-        url: downloadurl, //your url
-        method: 'GET',
-        responseType: 'blob', // important
-      }
-    )
+    if (filecontext) {
+      const file = await axios.get(`http://127.0.0.1:8000/${id}/files/${filecontext}`)
+      console.log(file.data)
+      const response = await axios(
+        {
+          url: "http://127.0.0.1:8000" + file.data.file, //your url
+          method: 'GET',
+          responseType: 'blob', // important
+        }
+      )
 
-    // create file link in browser's memory
-    const href = URL.createObjectURL(response.data);
 
-    // create "a" HTML element with href to file & click
-    const link = document.createElement('a');
-    link.href = href;
-    link.setAttribute('download', name); //or any other extension
-    document.body.appendChild(link);
-    link.click();
 
-    // clean up "a" element & remove ObjectURL
-    document.body.removeChild(link);
-    URL.revokeObjectURL(href);
+      // create file link in browser's memory
+      const href = URL.createObjectURL(response.data);
+
+      // create "a" HTML element with href to file & click
+      const link = document.createElement('a');
+      link.href = href;
+      link.setAttribute('download', file.data.name); //or any other extension
+      document.body.appendChild(link);
+      link.click();
+
+      // clean up "a" element & remove ObjectURL
+      document.body.removeChild(link);
+      URL.revokeObjectURL(href);
+    }
   }
 
   const joinserver = async () => {
@@ -279,170 +299,182 @@ export default function ServerRoom(props) {
   console.log(serverinfo.icon)
   return (
     <div className="room light" onClick={hideContext}  >
-      <Serverheader setsearchfolder={setsearchfolder} />
-      <div className="roommain" >
-        <div className="xxx" onContextMenu={showcontext}>
-          <div className="roomdata"  >
-            {
-              folders.map(f => {
+      {!serverinfo.name ?
+        (<h3 className="nos">please choose a channel before continue</h3>)
+        :
+        (<>
+          <Serverheader setsearchfolder={setsearchfolder} />
+          <div className="roommain" >
+            <div className="xxx" onContextMenu={showcontext}>
+              <div className="roomdata"  >
+                {
+                  folders.map(f => {
 
-                return (
-                  <Link onContextMenu={(e) => { showfoldercontext(e, f.id) }} className="data" to={'/' + id + '/' + f.id}>
-                    <img src={foldericon} width={64} alt={f.name} />
-                    <span className="name">{f.name}</span>
-                  </Link>
+                    return (
+                      <Link onContextMenu={(e) => { showfoldercontext(e, f.id) }} className="data" to={'/' + id + '/' + f.id}>
+                        <img src={foldericon} width={56} alt={f.name} />
+                        <span className="name">{f.name}</span>
+                      </Link>
 
-                )
-              })
+                    )
+                  })
 
 
-            }
-
-            {
-
-              files.map((f, i) => {
-
-                var icon
-
-                if (f.type.includes("video")) {
-                  icon = videoicon
                 }
-                else if (f.type.includes("image")) {
-                  icon = imageicon
+
+                {
+
+                  files.map((f, i) => {
+
+                    var icon
+
+                    if (f.type.includes("video")) {
+                      icon = videoicon
+                    }
+                    else if (f.type.includes("image")) {
+                      icon = imageicon
+                    }
+                    else if (f.type.includes("word")) {
+                      icon = wordicon
+                    }
+                    else {
+                      icon = texticon
+                    }
+                    return (
+                      <a href="#" className="data" onContextMenu={(e) => { showfilecontext(e, f.id) }} onClick={() => { setplayer(i) }}>
+                        <img src={icon} width={56} alt={f.name} />
+                        <span className="name">{f.name}</span>
+                      </a>
+
+                    )
+                  })
+
+
                 }
-                else if (f.type.includes("word")) {
-                  icon = wordicon
-                }
-                else {
-                  icon = texticon
-                }
-                return (
-                  <a href="#" className="data" onContextMenu={(e) => { showfilecontext(e, f.id) }} onClick={() => { setplayer(i) }}>
-                    <img src={icon} width={64} alt={f.name} />
-                    <span className="name">{f.name}</span>
-                  </a>
-
-                )
-              })
-
-
-            }
 
 
 
-            {context && (
-              <div
-                style={{ top: xYPosistion.y, left: xYPosistion.x }}
-                className="contextmenu"
-              >
-                <div className="menuElement" onClick={newfolder}>
-                  new folder
+                {context && (
+                  <div
+                    style={{ top: xYPosistion.y, left: xYPosistion.x }}
+                    className="contextmenu"
+                  >
+                    <div className="menuElement" onClick={newfolder}>
+                      new folder
+                    </div>
+                    <div className="menuElement" onClick={'() => initMenu("updfolder")'}>
+                      upload folder
+                    </div>
+                    <div className="menuElement" onClick={() => { fileshooserref.current.click() }}>
+                      upload file
+                    </div>
+                    <div className="menuElement" onClick={newfile}>
+                      new file
+                    </div>
+                    <div className="menuElement" onClick={''}>
+                      Paste
+                    </div>
+                  </div>
+                )}
+
+                {(foldercontext !== -1 || filecontext !== -1) && (
+                  <div
+                    style={{ top: xYPosistion.y, left: xYPosistion.x }}
+                    className="contextmenu"
+                  >
+                    <div className="menuElement" onClick={(e) => { deleteitem() }}>
+                      delete
+                    </div>
+                    <div className="menuElement" onClick={''}>
+                      cut
+                    </div>
+                    <div className="menuElement" onClick={rename}>
+                      rename
+                    </div>
+                    <div className="menuElement" onClick={() => getdetail()}>
+                      detail
+                    </div>
+                    <div className="menuElement" onClick={() => download()}>
+                      download
+                    </div>
+                  </div>
+                )}
+
+                <div>
+
+                  <input type="file" style={{ display: "none" }} onChange={uploadfile} ref={fileshooserref} />
+
+
                 </div>
-                <div className="menuElement" onClick={'() => initMenu("updfolder")'}>
-                  upload folder
-                </div>
-                <div className="menuElement" onClick={() => { fileshooserref.current.click() }}>
-                  upload file
-                </div>
-                <div className="menuElement" onClick={newfile}>
-                  new file
-                </div>
-                <div className="menuElement" onClick={''}>
-                  Paste
-                </div>
+
               </div>
-            )}
 
-            {(foldercontext !== -1 || filecontext !== -1) && (
-              <div
-                style={{ top: xYPosistion.y, left: xYPosistion.x }}
-                className="contextmenu"
-              >
-                <div className="menuElement" onClick={(e) => { deleteitem() }}>
-                  delete
-                </div>
-                <div className="menuElement" onClick={''}>
-                  cut
-                </div>
-                <div className="menuElement" onClick={''}>
-                  rename
-                </div>
-                <div className="menuElement" onClick={() => getdetail(foldercontext)}>
-                  detail
-                </div>
+              {renameobject.id && (< RenameDialog renameobject={renameobject} setrenameobject={setrenamedialog} serverid={id} />)}
+              <div className="bottombar">
+                {
+                  !userserverinfo.role ? (
+                    <button className="join" onClick={joinserver}>Join Server</button>) :
+                    (
+                      <button className="quit" onClick={quitserver}>quit Server</button>)
+
+
+                }
               </div>
-            )}
-
-            <div>
-
-              <input type="file" style={{ display: "none" }} onChange={uploadfile} ref={fileshooserref} />
-
-
             </div>
 
+            <div className="details">
+              {
+                folderdetail ?
+                  (
+                    <>
+
+
+                      <img src={foldericon} alt="folder" />
+
+                      <div className="informations">
+                        <span>name : <i>{folderdetail.name}</i></span>
+                        <span> creation date: <i>{dayjs(folderdetail.creationdate).format('YYYY-MM-DD')}</i></span>
+                        <span>author : <i>{folderdetail.author.username}</i></span>
+                        <span>parent : <i>{(folderdetail.parent) ? folderdetail.parent.name : "aucun"}</i></span>
+
+                        <span></span>
+                      </div>
+                    </>
+
+                  )
+
+                  :
+                  (
+                    <>
+
+
+                      <img src={"http://127.0.0.1:8000" + serverinfo.icon} alt="folder" />
+
+                      <div className="informations">
+                        <span>name : <i>{serverinfo.name}</i></span>
+                        <span> creation date: <i>{dayjs(serverinfo.creationdate).format('YYYY-MM-DD')}</i></span>
+                        <span></span>
+                      </div>
+                    </>
+
+                  )
+              }
+
+            </div>
           </div>
 
-          <div className="bottombar">
-            {
-              !userserverinfo.role ? (
-                <button className="join" onClick={joinserver}>Join Server</button>) :
-                (
-                  <button className="quit" onClick={quitserver}>quit Server</button>)
 
 
-            }
-          </div>
-        </div>
 
-        <div className="details">
           {
-            folderdetail ?
-              (
-                <>
-
-
-                  <img src={foldericon} alt="folder" />
-
-                  <div className="informations">
-                    <span>name : <i>{folderdetail.name}</i></span>
-                    <span> creation date: <i>{dayjs(folderdetail.creationdate).format('YYYY-MM-DD')}</i></span>
-                    <span>author : <i>{folderdetail.author.username}</i></span>
-                    <span></span>
-                  </div>
-                </>
-
-              )
-
-              :
-              (
-                <>
-
-
-                  <img src={"http://127.0.0.1:8000" + serverinfo.icon} alt="folder" />
-
-                  <div className="informations">
-                    <span>name : <i>{serverinfo.name}</i></span>
-                    <span> creation date: <i>{dayjs(serverinfo.creationdate).format('YYYY-MM-DD')}</i></span>
-                    <span></span>
-                  </div>
-                </>
-
-              )
+            (player !== -1) &&
+            (files.length > 0 && (
+              <Player files={files} file={player} setfile={setplayer} />
+            )
+            )
           }
-
-        </div>
-      </div>
-
-
-
-
-      {
-        (player !== -1) &&
-        (files.length > 0 && (
-          <Player files={files} file={player} setfile={setplayer} />
-        )
-        )
-      }
+        </>
+        )}
     </div>
   )
 }

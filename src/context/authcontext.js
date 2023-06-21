@@ -12,7 +12,14 @@ export const AuthProvider = ({ children }) => {
             ? JSON.parse(localStorage.getItem("authTokens"))
             : null
     );
-    const [theme, settheme] = useState(true)
+
+
+    console.log("theme")
+    console.log(Boolean(localStorage.getItem("theme")))
+
+    const [theme, settheme] = useState(() => (JSON.parse(localStorage.getItem("theme"))))
+    console.log("theme y : " + theme)
+
     const [user, setUser] = useState(() =>
         localStorage.getItem("authTokens")
             ? jwt_decode(localStorage.getItem("authTokens"))
@@ -44,6 +51,15 @@ export const AuthProvider = ({ children }) => {
             alert("Something went wrong!");
         }
     };
+
+    const changetheme = () => {
+        localStorage.removeItem("theme")
+        console.log("theme :" + theme)
+        localStorage.setItem("theme", theme === false);
+
+        settheme(theme === false);
+
+    }
 
     const registerUser = async (username, email, password, password2) => {
         const response = await fetch("http://127.0.0.1:8000/accounts/register/", {
@@ -83,7 +99,7 @@ export const AuthProvider = ({ children }) => {
         loginUser,
         logoutUser,
         theme,
-        settheme
+        changetheme
     };
 
     useEffect(() => {

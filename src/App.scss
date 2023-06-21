@@ -78,10 +78,29 @@ user-drag: none;
 .room {
   height: 100%;
   width: 100%;
+  display: flex;
+  flex-direction: column;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
   background-image:var(--room-background) ;
+
+  .nos
+  {
+    background-color: var(--input-bg-color);
+    margin: auto;
+    width: 300px;
+    text-align: center;
+    border-radius: 20px;
+    font-weight: 600;
+    padding: 10px 40px;
+    color: var(--text-color4);
+  }
+
+  button
+  {
+    cursor: pointer;
+  }
   .roommain
   {
     display: flex;
@@ -90,7 +109,7 @@ user-drag: none;
     .xxx
     {
       width: 100%;
-      height: calc(100% - 50px);
+      height: 100%;
 
     }
     .details
@@ -127,10 +146,11 @@ img
   }
 
   .roomdata {
-    padding: 50px 5px;
+    padding: 10px 5px;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
+    row-gap: 3px;
 width: 100%;
 height: fit-content;
     overflow: auto;
@@ -167,15 +187,15 @@ color: #b66;
   }
   .data {
     font-weight: 400;
-    height: 150px;
+    height: 124px;
     display: flex;
     flex-direction: column;
-    width: 150px;
+    width: 132px;
     justify-content: center;
     align-items: center;
     color: var(--text-color1);
     border-radius:20px;
-    padding: 20px 10px;
+    padding: 10px 10px;
 
     .name {
       margin: 10px;
@@ -605,4 +625,64 @@ h1 {
   color: white;
 }
 
+}
+
+
+.dialog-wrapper
+{
+  position:fixed;
+  width:100%;
+  top:0;
+  left:0;
+  z-index: 10000;
+  display: flex;
+  height: 100%;
+  background-color: #1115;
+  backdrop-filter: blur(50px);
+
+  .dialog
+  {
+    max-width: 100%;
+    width: 300px;
+    padding: 30px 20px;
+    margin: auto;
+    background-color: var(--sidebar-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+
+    .form-input
+    {
+      padding: 20px 0;
+      input
+      {
+        color: var(--text-color2);
+        background-color: var(--input-bg-color);
+        border: 2px solid var(--input-border-color);
+        border-radius: 20px;
+        padding: 8px;
+        outline: 0;
+        width: 100%;
+      }
+      button
+      {
+        color: var(--text-color2);
+        background-color: var(--input-bg-color);
+        border: 2px solid var(--input-border-color);
+        border-radius: 20px;
+        padding: 8px;
+        outline: 0;
+        width: 100%;
+
+        &:hover
+        {
+          background-color: var(--active-server-item-color);
+        } 
+      }
+    }
+
+
+    
+
+  }
 }

@@ -104,6 +104,39 @@ const itemvariants = {
   }
 };
 
+function CreateServerDialog({ setaddserver }) {
+  const axios = useAxios()
+  const [name, setname] = useState("")
+
+  const handleclose = (e) => {
+    e.stopPropagation()
+    setaddserver(false)
+  }
+  const createserver = async () => {
+
+    axios.post("http://localhost:8000/", {
+      name: name
+    })
+
+    setaddserver(false)
+  }
+  return (
+    <div className="dialog-wrapper" onClick={handleclose}>
+      <div className="dialog" onClick={(e) => e.stopPropagation()}>
+
+        <div className="form-input">
+          <input type="text" placeholder="name" onChange={(e) => setname(e.target.value)} />
+
+        </div>
+
+        <div className="form-input">
+          <button onClick={createserver}> add server</button>
+
+        </div>
+      </div>
+    </div>
+  )
+}
 
 
 function UserMenu() {
@@ -111,15 +144,16 @@ function UserMenu() {
   const containerRef = useRef(null);
   const { height } = { height: 100 }
   const navigate = useNavigate()
-  let { settheme, theme } = useContext(AuthContext);
+  let { changetheme, theme } = useContext(AuthContext);
+  const [addserver, setaddserver] = useState(false)
   return (
-    <motion.nav
+    <> <motion.nav
       initial={false}
       animate={isOpen ? "open" : "closed"}
       custom={height}
       ref={containerRef}
     >
-      <motion.div className="background" var3iants={sidebar} />
+      <motion.div className="background" variants={sidebar} />
       < MenuToggle toggle={() => toggleOpen()} />
       <motion.ul variants={variants}>
 
@@ -135,13 +169,13 @@ function UserMenu() {
           whileTap={{ scale: 0.95 }}
         >
           <div className="icon-placeholder" />
-          <div className="text-placeholder"  >new server</div>
+          <div className="text-placeholder" onClick={() => { setaddserver(true); toggleOpen() }}>new server</div>
         </motion.li>
 
         <motion.li
           variants={itemvariants}
           whileTap={{ scale: 0.95 }}
-          onClick={() => settheme(theme === false)}
+          onClick={changetheme}
         >
           <div className="icon-placeholder" />
           <div className="text-placeholder"  >switch to {(theme) ? "dark theme" : "light theme"}</div>
@@ -159,6 +193,10 @@ function UserMenu() {
       </motion.ul>
 
     </motion.nav>
+      {(addserver) && <CreateServerDialog setaddserver={setaddserver} />}
+
+    </>
+
   );
 }
 
@@ -252,7 +290,9 @@ function FolderNavigation(props) {
       setfolderlist(result.data)
     })
 
-    axios.get(`http://localhost:8000/${id}/files?name=${e.target.value}`).then(result => {
+    axios.get(`http://localhost:8000/${id}/files`, {
+      params: par
+    }).then(result => {
       setfilelist(result.data)
     })
 
@@ -317,7 +357,7 @@ function FolderNavigation(props) {
                 <img src={foldericon} />
                 <div className="info">
                   <h3>{f.name}</h3>
-                  <span>{f.author}</span>
+                  <span>{f.author.username}</span>
                 </div>
                 <div>
                 </div>
@@ -351,7 +391,7 @@ function FolderNavigation(props) {
                 <img src={icon} />
                 <div className="info">
                   <h3>{f.name}</h3>
-                  <span>{f.author}</span>
+                  <span>{f.author.username}</span>
                 </div>
                 <div>
                 </div>
