@@ -1,42 +1,21 @@
 import { faFolder, faAdd, faRecycle, faFileLines, faFolderOpen, faEllipsisVertical, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { useEffect, useRef, useState } from "react"
+import { createContext, useEffect, useRef, useState } from "react"
 import defaultback from '../../assets/defaultback.jpg'
 import { Link, useParams } from "react-router-dom"
-import dayjs from "dayjs"
 import foldericon from '../../assets/folder.png'
 import texticon from '../../assets/text.png'
 import videoicon from '../../assets/video.png'
 import imageicon from '../../assets/image.png'
 import wordicon from '../../assets/word.png'
 
-import Player from "./videoplayer"
-import useAxios from "../../utils/useAxios"
+import useAxios, { baseURL } from "../../utils/useAxios"
+import Serverheader from "./serverheader"
+import { AdminsDialog, JoinRequestsDialog, ManageDialog, MembersDialog, ServerInfoDialog } from "./dialogs"
+import Player from "./player/player"
 
 
 
-function Serverheader({ setsearchfolder }) {
-  const [crttime, setcrttime] = useState("")
-
-  window.setInterval(() => {
-    var today = new Date(),
-
-      curTime = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
-    setcrttime(curTime);
-  }, 1000)
-  return (
-    <div className="serverheader">
-      <span style={{ color: "white" }}>
-        {crttime}
-      </span>
-
-      <div className="tools">
-        <button><FontAwesomeIcon size="2x" icon={faSearch} onClick={() => setsearchfolder(true)} /></button>
-        <button><FontAwesomeIcon size="2x" icon={faEllipsisVertical} /></button>
-      </div>
-    </div>
-  )
-}
 
 
 function RenameDialog(props) {
@@ -64,9 +43,15 @@ function RenameDialog(props) {
 }
 
 
+const DIALOGS = [ServerInfoDialog, ManageDialog]
+
+export const servercontext = createContext();
+
 
 export default function ServerRoom(props) {
   const fileshooserref = useRef(1)
+
+  const [dialog, setdialog] = useState(null)
   const { id, folderid } = useParams()
   const [folders, setfolders] = useState([])
   const [folderdetail, setfolderdetail] = useState()
@@ -79,6 +64,7 @@ export default function ServerRoom(props) {
   const [filecontext, setfilecontext] = useState(-1);
   const [renameobject, setrenameobject] = useState({})
   const { setsearchfolder } = props
+
 
   const [xYPosistion, setXyPosistion] = useState({ x: 0, y: 0 });
   const axios = useAxios()
@@ -96,10 +82,10 @@ export default function ServerRoom(props) {
   };
   const setrenamedialog = async (name) => {
     let url = (renameobject.file) ?
-      `http://localhost:8000/${id}/files/${renameobject.id}`
+      `${baseURL}/${id}/files/${renameobject.id}`
       :
 
-      `http://localhost:8000/${id}/folders/${renameobject.id}`
+      `${baseURL}/${id}/folders/${renameobject.id}`
     axios.patch(url, {
       name: name
     })
@@ -141,14 +127,14 @@ export default function ServerRoom(props) {
 
   const [detail, setdetail] = useState(undefined);
   const getdetail = async (f) => {
-    const folder = await axios.get(`http:  console.log(downloadurl)//localhost:8000/${id}/folders/${f}`)
+    const folder = await axios.get(`${baseURL}/${id}/folders/${f}`)
 
     setdetail(folder.data)
 
   }
 
   const updateuserserverinfo = () => {
-    axios.get(`http://localhost:8000/${id}/userinfo`).then(result => {
+    axios.get(`${baseURL}/${id}/userinfo`).then(result => {
       setuserserverinfo(result.data)
 
       console.log(result.data)
@@ -164,18 +150,33 @@ export default function ServerRoom(props) {
 
   const update =
     async () => {
-      const { data } = await axios.get(`http://localhost:8000/${id}`)
+      const { data } = await axios.get(`${baseURL}/${id}`)
       setserverinfo(data)
-      const folders = await axios.get(`http://localhost:8000/${id}/folders${(folderid) ? "?parent=" + folderid : ''}`)
-      setfolders(folders.data)
-      const files = await axios.get(`http://localhost:8000/${id}/files${(folderid) ? "?parent=" + folderid : ''}`)
-      if (folderid) {
-        const folder = await axios.get(`http://localhost:8000/${id}/folders/${folderid}`)
-        setfolderdetail(folder.data)
-        console.log(folder.data)
+      console.log(`server info :`, data)
+      console.log("user server info :", userserverinfo)
+
+
+      if (userserverinfo.role) {
+        const folders = await axios.get(`${baseURL}/${id}/folders${(folderid) ? "?parent=" + folderid : ''}`)
+        setfolders(folders.data)
+        const files = await axios.get(`${baseURL}/${id}/files${(folderid) ? "?parent=" + folderid : ''}`)
+        if (folderid) {
+          const folder = await axios.get(`${baseURL}/${id}/folders/${folderid}`)
+          setfolderdetail(folder.data)
+          console.log(folder.data)
+        }
+
+
+        setfiles(files.data)
+
       }
 
-      setfiles(files.data)
+      else {
+        setfolders([])
+        setfiles([])
+
+      }
+
 
 
     }
@@ -183,12 +184,12 @@ export default function ServerRoom(props) {
   useEffect(() => {
 
     update()
-  }, [id, folderid])
+  }, [userserverinfo, folderid])
 
   const newfolder = async () => {
 
     console.log(folderid)
-    await axios.post(`http://127.0.0.1:8000/${id}/folders/create`, {
+    await axios.post(`${baseURL}/${id}/folders/create`, {
       parent: folderid
     })
     update()
@@ -203,7 +204,7 @@ export default function ServerRoom(props) {
     formData.append("parent", folderid || -1)
 
 
-    await axios.post(`http://127.0.0.1:8000/${id}/files/create`,
+    await axios.post(`${baseURL}/${id}/files/create`,
       formData)
 
     update()
@@ -218,7 +219,7 @@ export default function ServerRoom(props) {
     formData.append("name", e.target.files[0].name)
     formData.append("parent", folderid || -1)
 
-    await axios.post(`http://127.0.0.1:8000/${id}/files/create`, formData)
+    await axios.post(`${baseURL}/${id}/files/create`, formData)
 
 
     update()
@@ -234,7 +235,7 @@ export default function ServerRoom(props) {
   const deleteitem = async () => {
 
 
-    (foldercontext != -1) ? await axios.delete(`http://127.0.0.1:8000/${id}/folders/${foldercontext}`) : await axios.delete(`http://127.0.0.1:8000/${id}/files/${filecontext}`)
+    (foldercontext != -1) ? await axios.delete(`${baseURL}/${id}/folders/${foldercontext}`) : await axios.delete(`${baseURL}/${id}/files/${filecontext}`)
     update()
   }
 
@@ -250,6 +251,8 @@ export default function ServerRoom(props) {
 
   }
 
+
+
   const pastefolder = async () => {
 
   }
@@ -258,11 +261,11 @@ export default function ServerRoom(props) {
   const download = async () => {
 
     if (filecontext) {
-      const file = await axios.get(`http://127.0.0.1:8000/${id}/files/${filecontext}`)
+      const file = await axios.get(`${baseURL}/${id}/files/${filecontext}`)
       console.log(file.data)
       const response = await axios(
         {
-          url: "http://127.0.0.1:8000" + file.data.file, //your url
+          url: `${baseURL}` + file.data.file, //your url
           method: 'GET',
           responseType: 'blob', // important
         }
@@ -287,25 +290,50 @@ export default function ServerRoom(props) {
   }
 
   const joinserver = async () => {
-    await axios.get(`http://localhost:8000/${id}/join`)
+    await axios.get(`${baseURL}/${id}/join`)
     updateuserserverinfo()
   }
 
   const quitserver = async () => {
-    await axios.delete(`http://localhost:8000/${id}/userinfo`)
+    await axios.delete(`${baseURL}/${id}/userinfo`)
     updateuserserverinfo()
   }
 
-  console.log(serverinfo.icon)
+  console.log(serverinfo)
+  const CONTEXTVALUE = {
+    serverinfo: serverinfo,
+    setdialog: setdialog,
+  }
+
+  function getdialog() {
+    switch (dialog) {
+      case 0:
+        return <ServerInfoDialog />
+      case 1:
+        return <ManageDialog />
+      case 10:
+        return <MembersDialog />
+      case 11:
+        return <AdminsDialog />
+      case 12:
+        return <JoinRequestsDialog />
+
+
+      default:
+        break
+    }
+  }
+
+
   return (
-    <div className="room light" onClick={hideContext}  >
-      {!serverinfo.name ?
-        (<h3 className="nos">please choose a channel before continue</h3>)
-        :
-        (<>
-          <Serverheader setsearchfolder={setsearchfolder} />
-          <div className="roommain" >
-            <div className="xxx" onContextMenu={showcontext}>
+    <servercontext.Provider value={CONTEXTVALUE}>
+      <div className="room light" onClick={hideContext}  >
+        {!serverinfo.name ?
+          (<h3 className="nos">please choose a channel before continue</h3>)
+          :
+          (<>
+            <Serverheader setsearchfolder={setsearchfolder} />
+            <div className="roommain" onContextMenu={showcontext}>
               <div className="roomdata"  >
                 {
                   folders.map(f => {
@@ -328,12 +356,10 @@ export default function ServerRoom(props) {
 
                     var icon
 
-                    if (f.type.includes("video")) {
-                      icon = videoicon
+                    if (f.type.includes("video") | f.type.includes("image")) {
+                      icon = baseURL + f.thumbnail
                     }
-                    else if (f.type.includes("image")) {
-                      icon = imageicon
-                    }
+
                     else if (f.type.includes("word")) {
                       icon = wordicon
                     }
@@ -410,71 +436,42 @@ export default function ServerRoom(props) {
               </div>
 
               {renameobject.id && (< RenameDialog renameobject={renameobject} setrenameobject={setrenamedialog} serverid={id} />)}
-              <div className="bottombar">
-                {
-                  !userserverinfo.role ? (
-                    <button className="join" onClick={joinserver}>Join Server</button>) :
-                    (
-                      <button className="quit" onClick={quitserver}>quit Server</button>)
-
-
-                }
-              </div>
             </div>
 
-            <div className="details">
+
+            <div className="bottombar">
               {
-                folderdetail ?
+                !userserverinfo.role ? (
+                  <button className="join" onClick={joinserver}>{serverinfo.type === 0 ? " Join Server" : "request to join"}</button>) :
                   (
-                    <>
+                    <button className="quit" onClick={quitserver}>quit Server</button>)
 
 
-                      <img src={foldericon} alt="folder" />
-
-                      <div className="informations">
-                        <span>name : <i>{folderdetail.name}</i></span>
-                        <span> creation date: <i>{dayjs(folderdetail.creationdate).format('YYYY-MM-DD')}</i></span>
-                        <span>author : <i>{folderdetail.author.username}</i></span>
-                        <span>parent : <i>{(folderdetail.parent) ? folderdetail.parent.name : "aucun"}</i></span>
-
-                        <span></span>
-                      </div>
-                    </>
-
-                  )
-
-                  :
-                  (
-                    <>
-
-
-                      <img src={"http://127.0.0.1:8000" + serverinfo.icon} alt="folder" />
-
-                      <div className="informations">
-                        <span>name : <i>{serverinfo.name}</i></span>
-                        <span> creation date: <i>{dayjs(serverinfo.creationdate).format('YYYY-MM-DD')}</i></span>
-                        <span></span>
-                      </div>
-                    </>
-
-                  )
               }
-
             </div>
-          </div>
 
 
 
 
-          {
-            (player !== -1) &&
-            (files.length > 0 && (
-              <Player files={files} file={player} setfile={setplayer} />
-            )
-            )
-          }
-        </>
-        )}
-    </div>
+            {
+              (player !== -1) &&
+              (files.length > 0 && (
+                <Player files={files} file={player} setfile={setplayer} />
+              )
+              )
+            }
+          </>
+          )}
+      </div>
+      {
+        (
+          getdialog()
+        )
+
+      }
+
+
+    </servercontext.Provider>
+
   )
 }

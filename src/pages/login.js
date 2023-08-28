@@ -25,13 +25,30 @@ export default function Login() {
             {!user &&
                 <div className="login">
                     <div className='loginwrapper'>
-                        <img src={Logo} alt='nest' />
+                        <div className='logo-wrapper'>
+                            <img src={Logo} alt='nest' />
+
+                        </div>
                         <form onSubmit={handleSubmit}>
 
-                            <input id="email" type='text' />
-                            <input id="password" type='password' />
+                            <div className='login-text'>
+                                <h2>welcome back</h2>
+                                <span>
+                                    we are happy to see you again</span>
+                            </div>
+                            <div></div>
+                            <div className='form-input'>
+                                <label>email or username</label>
+                                <input id="email" type='text' />
+                            </div>
+
+                            <div className='form-input'>
+                                <label>password</label>
+                                <input id="password" type='password' />
+
+                            </div>
                             <button>login</button>
-                            <span>you don't have an account <Link to={'/register'}>register Now</Link></span>
+                            <span className='register-text'>you don't have an account <Link to={'/register'}>register Now</Link></span>
 
                         </form>
 

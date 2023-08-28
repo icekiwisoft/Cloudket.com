@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
+import { baseURL } from "../utils/useAxios";
 
 const AuthContext = createContext();
 
@@ -14,12 +15,9 @@ export const AuthProvider = ({ children }) => {
     );
 
 
-    console.log("theme")
     console.log(Boolean(localStorage.getItem("theme")))
 
     const [theme, settheme] = useState(() => (JSON.parse(localStorage.getItem("theme"))))
-    console.log("theme y : " + theme)
-
     const [user, setUser] = useState(() =>
         localStorage.getItem("authTokens")
             ? jwt_decode(localStorage.getItem("authTokens"))
@@ -30,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     const history = useNavigate()
 
     const loginUser = async (username, password) => {
-        const response = await fetch("http://127.0.0.1:8000/accounts/token/", {
+        const response = await fetch(`${baseURL}/accounts/token/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -53,16 +51,13 @@ export const AuthProvider = ({ children }) => {
     };
 
     const changetheme = () => {
-        localStorage.removeItem("theme")
-        console.log("theme :" + theme)
         localStorage.setItem("theme", theme === false);
-
         settheme(theme === false);
 
     }
 
     const registerUser = async (username, email, password, password2) => {
-        const response = await fetch("http://127.0.0.1:8000/accounts/register/", {
+        const response = await fetch(`${baseURL}//accounts/register/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

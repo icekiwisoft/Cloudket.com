@@ -1,11 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Roboto&display=swap');
+
+
+
+.content {
+  --sidebar-color: #1c2a35;
+  --room-color: #0e1720;
+  --text-color1: #eee;
+  --text-color2: #ddd;
+  --text-color3: #e6e6e6;
+  --text-color4: #e4e4e4;
+  --border-color-1: #111;
+  --main-col1: #ff004455;
+  --active-server-item-color: rgb(0, 139, 204);
+  --hover-server-item-color: #29292963;
+  --setting-popup-bg: #3335;
+  --input-bg-color: #222;
+  --input-border-color: #222;
+  --input-bs-color: #ff005d;
+  --folder-hover-color: #ff004455;
+  --room-background: url(assets/defaultback.jpg);
+  --room-background-color: #131d27;
+  --option-btn-color: #fffa;
+  --hover-option-btn-bg-color: #222;
+  --dialog-part-color: #050505;
+}
+
+
+::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar {
+  width: 3px;
+  background-color: #222;
+  display: none;
+}
+
+button {
+  border: none;
+}
+
+.sidebar:hover {
+  ::-webkit-scrollbar {
+    display: block;
+  }
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #777;
+}
+
+
+.content.light * {
+  --sidebar-color: #fafafa;
+  --dialog-part-color: #fff;
+  --room-background-color: #fff;
+
+  --room-color: #cacaca;
+  --setting-popup-bg: rgba(255, 255, 255, 0.603);
+  --text-color1: #333;
+  --text-color3: #222;
+  --text-color4: #333;
+  --border-color-1: #eee;
+  --input-bg-color: #fff;
+  --input-border-color: #0063c0;
+  --input-bs-color: #0084ff;
+  --text-color2: #444;
+  --folder-hover-color: #006eff55;
+  --hover-server-item-color: #e7e7e763;
+  --active-server-item-color: rgb(51, 144, 236);
+  --room-background: url(assets/light.png);
+  --option-btn-color: #222;
+  --hover-option-btn-bg-color: #d6d6d6;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: #111;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+* {
+  position: relative;
+  box-sizing: border-box;
+}
+
+
+
+button,
+a {
+  cursor: pointer;
+  text-decoration: none;
 }
 
 code {

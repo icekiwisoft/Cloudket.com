@@ -5,12 +5,12 @@ import texticon from '../../assets/text.png'
 import videoicon from '../../assets/video.png'
 import imageicon from '../../assets/image.png'
 import wordicon from '../../assets/word.png'
-
+import nothing from '../../assets/nothing.png'
 
 import { useContext, useEffect, useRef, useState } from "react"
 import { Link, NavLink, useNavigate, useParams } from "react-router-dom"
 import { motion, useCycle } from "framer-motion"
-import useAxios from "../../utils/useAxios"
+import useAxios, { baseURL } from "../../utils/useAxios"
 import AuthContext from "../../context/authcontext"
 
 const sidebar = {
@@ -33,7 +33,7 @@ const sidebar = {
   }
 };
 
-const Path = props => (
+export const Path = props => (
   <motion.path
     fill="transparent"
     strokeWidth="3"
@@ -44,7 +44,8 @@ const Path = props => (
 );
 
 export const MenuToggle = ({ toggle }) => (
-  <button onClick={toggle}>
+  <button onClick={toggle}
+  >
     <svg width="23" height="23" viewBox="0 0 23 23">
       <Path
         stroke={"strokecolor"}
@@ -74,7 +75,7 @@ export const MenuToggle = ({ toggle }) => (
 );
 
 
-const variants = {
+export const variants = {
   open: {
     transition: { staggerChildren: 0.07, delayChildren: 0.2 }
   },
@@ -83,7 +84,7 @@ const variants = {
   }
 };
 
-const itemvariants = {
+export const itemvariants = {
   open: {
     y: 0,
     opacity: 1,
@@ -114,7 +115,7 @@ function CreateServerDialog({ setaddserver }) {
   }
   const createserver = async () => {
 
-    axios.post("http://localhost:8000/", {
+    axios.post("${baseURL}/", {
       name: name
     })
 
@@ -200,60 +201,6 @@ function UserMenu() {
   );
 }
 
-
-
-
-
-function createsettingoption(name, color) {
-  return { name, color }
-}
-
-const options = [
-  createsettingoption("profil"),
-  createsettingoption("appearance"),
-  createsettingoption("server profil"),
-]
-
-function SettingsNavigation(props) {
-
-  const { option, setoption } = props
-
-  return (
-    <div>
-
-      {
-        options.map(o => {
-          return (<button>{o.name}</button>)
-        })
-      }
-
-    </div>
-  )
-}
-
-function SettingsView(props) {
-
-  return (
-    <div>
-      <h1></h1>
-
-    </div>
-  )
-}
-
-
-
-export function Settings() {
-
-  const [option, setoption] = useState(options[0])
-
-  return (
-    <div className="settings">
-      <SettingsNavigation option={option} setoption={setoption} />
-      <SettingsView option={option} />
-    </div>)
-}
-
 function FolderNavigation(props) {
   const [folderlist, setfolderlist] = useState([])
   const [filelist, setfilelist] = useState([])
@@ -284,13 +231,13 @@ function FolderNavigation(props) {
 
     console.log(par)
     setsearchvalue(e.target.value)
-    axios.get(`http://localhost:8000/${id}/folders`, {
+    axios.get(`${baseURL}/${id}/folders`, {
       params: par
     }).then(result => {
       setfolderlist(result.data)
     })
 
-    axios.get(`http://localhost:8000/${id}/files`, {
+    axios.get(`${baseURL}/${id}/files`, {
       params: par
     }).then(result => {
       setfilelist(result.data)
@@ -302,7 +249,7 @@ function FolderNavigation(props) {
 
   const update =
     async () => {
-      const { data } = await axios.get(`http://localhost:8000/${id}`)
+      const { data } = await axios.get(`${baseURL}/${id}`)
       setserverinfo(data)
 
     }
@@ -320,7 +267,7 @@ function FolderNavigation(props) {
 
       <div className="serverinsearch">
         <div className="item f">
-          <img src={"http://127.0.0.1:8000" + serverinfo.icon} />
+          <img src={`${baseURL} + ${serverinfo.icon}`} />
           <div className="info">
             <h3>{serverinfo.name}</h3>
             <span>{serverinfo.shortdesc}</span>
@@ -413,7 +360,7 @@ export default function ServerNavigation(props) {
   const { searchfolder, setsearchfolder } = props
   console.log(searchfolder)
   const update = async () => {
-    const servers = await axios.get("http://localhost:8000/accounts/current/servers")
+    const servers = await axios.get(`${baseURL}/accounts/current/servers`)
 
     setservers(servers.data)
 
@@ -423,7 +370,7 @@ export default function ServerNavigation(props) {
 
   const onsearchvalue = e => {
     setsearchvalue(e.target.value)
-    axios.get(`http://localhost:8000?name=${e.target.value}`).then(result => {
+    axios.get(`${baseURL}?name=${e.target.value}`).then(result => {
       setsearchserver(result.data)
     })
 
@@ -446,25 +393,75 @@ export default function ServerNavigation(props) {
       <div className="serverlist">
         {searchvalue === "" ?
           (
-            servers.map((s) => {
-              return (
-                <NavLink to={`/${s.id}`} className="item">
-                  <img src={"http://127.0.0.1:8000" + s.icon} />
-                  <div className="info">
-                    <h3>{s.name}</h3>
-                    <span>{s.shortdesc}</span>
+            servers.length > 0 ?
+              servers.map((s) => {
+                var charcode = s.name.toLowerCase().charCodeAt(0)
+                var color;
+
+                if (charcode <= 102)
+                  color = "#219642"
+                else if (charcode <= 116)
+                  color = "#0063c0"
+                else if (charcode <= 120)
+                  color = "green"
+                else
+                  color = "#F85528"
+                console.log(`charcode ${charcode}`)
+
+                return (
+                  <NavLink to={`/${s.id}`} className="item">
+                    <div className="avatar">
+                      {
+                        s.icon ?
+                          (<img src={baseURL + s.icon} alt="o" />) :
+
+
+                          (<div className="avatar-img default" style={{ backgroundColor: color }}>
+                            {s.name[0]}
+                          </div>)
+
+
+
+                      }                  </div>
+
+                    <div className="info">
+                      <h3>{s.name}</h3>
+                      <span>{s.shortdesc}</span>
+                    </div>
+                    <div>
+                    </div>
+                  </NavLink>
+                )
+
+
+              }) :
+              (
+                <div className="informations" style={{ margin: "auto" }}>
+                  <div className="noservers">
+                    <img src={nothing} />
+                    <span>bro there is nothing there</span>
                   </div>
-                  <div>
-                  </div>
-                </NavLink>
+
+                </div>
               )
-            })
+
+
           ) :
           (
             searchserver.map((s) => {
               return (
                 <NavLink to={`/${s.id}`} className="item">
-                  <img src={"http://127.0.0.1:8000" + s.icon} />
+                  <div className="avatar">
+                    {
+                      s.icon ?
+                        (<img src={baseURL + s.icon} alt="o" />) :
+                        (<div className="default">
+                          {s.name[0]}
+                        </div>)
+
+                    }
+
+                  </div>
                   <div className="info">
                     <h3>{s.name}</h3>
                     <span>{s.shortdesc}</span>
