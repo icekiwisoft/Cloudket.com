@@ -4,7 +4,7 @@ import play from '../../../assets/play.png'
 import pause from '../../../assets/pause.png'
 import { baseURL } from "../../../utils/useAxios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExpand, faPause, faPlay, faVolcano, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
+import { faCompress, faExpand, faPause, faPlay, faRepeat, faVolcano, faVolumeHigh } from "@fortawesome/free-solid-svg-icons";
 import { motion, useCycle } from "framer-motion"
 
 // function TimeControl({ videoRef, videoTime }) {
@@ -24,6 +24,7 @@ export default function VideoPlayer() {
     const [mouse, setmouse] = useState(0)
     const [changing, setischanging] = useState(false);
     const [muted, setmuted] = useCycle(false, true)
+    const [loop, setloop] = useCycle(false, true)
     const [fullscreen, setfullscreen] = useCycle(false, true)
 
     const videoRef = useRef(null);
@@ -39,9 +40,33 @@ export default function VideoPlayer() {
         [muted]
     )
 
+
+    useEffect(
+        () => {
+            videoRef.current.loop = loop
+        },
+        [loop]
+    )
+
+
+
+
+    useEffect(
+        () => {
+
+            if (videoplayerRef.current) {
+                if (fullscreen)
+                    videoplayerRef.current.requestFullscreen()
+                else if (document.fullscreenElement)
+                    document.exitFullscreen();
+            }
+
+        },
+        [fullscreen]
+    )
+
     useEffect(() => {
 
-        videoRef.current.play()
     }, [file])
 
 
@@ -63,6 +88,7 @@ export default function VideoPlayer() {
             setmouse(e.clientX)
         })
 
+        videoRef.current.focus()
         return () => clearInterval(interval);
 
 
@@ -70,22 +96,13 @@ export default function VideoPlayer() {
     }, [])
 
 
-    useEffect(() => {
-
-        if (playing)
-            videoRef.current?.play();
-        else
-            videoRef.current?.pause();
-
-    }, [playing])
-
 
 
     const videoHandler = (control) => {
         if (control === "play") {
-            setPlaying(true);
+            videoRef.current?.play()
         } else if (control === "pause") {
-            setPlaying(false);
+            videoRef.current?.pause();
         }
     };
 
@@ -100,9 +117,6 @@ export default function VideoPlayer() {
         videoRef.current.currentTime -= 5;
     };
 
-    const fullscreenvideoplayer = () => {
-        videoplayerRef.current.requestFullscreen()
-    }
 
 
     const handlevideoplayer = (e) => {
@@ -144,17 +158,45 @@ export default function VideoPlayer() {
     }
 
 
+    const handleonplaying = () => {
+        setPlaying(true)
+    }
 
+
+    const handleonpause = () => {
+        setPlaying(false)
+    }
+
+    const handlekeypressed = (event) => {
+        console.log(1)
+        if (event.keyCode === 32) { // spacebar keycode
+            if (videoRef.current.paused) {
+                videoRef.current.play();
+            } else {
+                videoRef.current.pause();
+            }
+        }
+    }
 
 
     return (
-        <div className="videoplayer" ref={videoplayerRef} onClick={handlevideoplayer}>
-
+        <div className="videoplayer" ref={videoplayerRef}
+        >
             <video
+
                 ref={videoRef}
+                onClick={
+                    () => videoplayerRef.current.focus()
+                }
+                controlslist="nodownload"
+                tabindex="-1"
+
+                onKeyDown={handlekeypressed}
                 className="video"
-                controls={false}
+
                 onLoadedData={checkloaded}
+                onPlaying={handleonplaying}
+                onPause={handleonpause}
             >
 
                 <source src={`${baseURL}/filestream?type=video&file=${files[file].id} `} type={files[file].type}></source>
@@ -178,7 +220,8 @@ export default function VideoPlayer() {
                         />
                     )}
 
-                    <FontAwesomeIcon icon={faExpand} onClick={fullscreenvideoplayer} />
+                    <FontAwesomeIcon icon={faRepeat} className={`icon ${loop && ' active'} `} onClick={setloop} />
+                    <FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} onClick={setfullscreen} />
                     <FontAwesomeIcon icon={faVolumeHigh} onClick={setmuted} />
 
                 </div>

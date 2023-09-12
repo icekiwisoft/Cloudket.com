@@ -1,20 +1,15 @@
-import { faFolder, faAdd, faRecycle, faFileLines, faFolderOpen, faEllipsisVertical, faSearch } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { createContext, useEffect, useRef, useState } from "react"
-import defaultback from '../../assets/defaultback.jpg'
 import { Link, useParams } from "react-router-dom"
 import foldericon from '../../assets/folder.png'
 import texticon from '../../assets/text.png'
-import videoicon from '../../assets/video.png'
-import imageicon from '../../assets/image.png'
 import wordicon from '../../assets/word.png'
 
 import useAxios, { baseURL } from "../../utils/useAxios"
 import Serverheader from "./serverheader"
-import { AdminsDialog, JoinRequestsDialog, ManageDialog, MembersDialog, ServerInfoDialog } from "./dialogs"
 import Player from "./player/player"
+import ServerManager from "./ManageServer"
 
-
+import './dialogs.scss'
 
 
 
@@ -43,7 +38,6 @@ function RenameDialog(props) {
 }
 
 
-const DIALOGS = [ServerInfoDialog, ManageDialog]
 
 export const servercontext = createContext();
 
@@ -51,7 +45,7 @@ export const servercontext = createContext();
 export default function ServerRoom(props) {
   const fileshooserref = useRef(1)
 
-  const [dialog, setdialog] = useState(null)
+  const [manager, setmanager] = useState(false)
   const { id, folderid } = useParams()
   const [folders, setfolders] = useState([])
   const [folderdetail, setfolderdetail] = useState()
@@ -302,27 +296,9 @@ export default function ServerRoom(props) {
   console.log(serverinfo)
   const CONTEXTVALUE = {
     serverinfo: serverinfo,
-    setdialog: setdialog,
+    setmanager: setmanager,
   }
 
-  function getdialog() {
-    switch (dialog) {
-      case 0:
-        return <ServerInfoDialog />
-      case 1:
-        return <ManageDialog />
-      case 10:
-        return <MembersDialog />
-      case 11:
-        return <AdminsDialog />
-      case 12:
-        return <JoinRequestsDialog />
-
-
-      default:
-        break
-    }
-  }
 
 
   return (
@@ -464,9 +440,7 @@ export default function ServerRoom(props) {
           )}
       </div>
       {
-        (
-          getdialog()
-        )
+        manager && <ServerManager />
 
       }
 

@@ -13,7 +13,7 @@
 
   .dialog {
     max-width: 100%;
-    width: 356px;
+    width: 500px;
     max-height: 90vh;
     max-height: 100%;
     margin: auto;
@@ -93,13 +93,11 @@
       display: flex;
 
       button {
-        &.cancel
-        {
-            color: rgb(94, 0, 0);
+        &.cancel {
+          color: rgb(94, 0, 0);
         }
-        &.save
-        {
-            color: rgb(21, 117, 243);
+        &.save {
+          color: rgb(21, 117, 243);
         }
       }
     }

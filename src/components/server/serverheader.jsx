@@ -4,6 +4,8 @@ import { motion, useCycle } from "framer-motion"
 import { useContext, useRef, useState } from "react"
 import { faEllipsisVertical, faSearch } from "@fortawesome/free-solid-svg-icons"
 import { servercontext } from "./serverroom"
+import { baseURL } from "../../utils/useAxios"
+import { ServerAvatar } from "./utils"
 
 
 
@@ -12,7 +14,7 @@ function ChannelMenu() {
     const [isOpen, toggleOpen] = useCycle(false, true);
     const containerRef = useRef(null);
     const { height } = { height: 100 }
-    const { setdialog } = useContext(servercontext)
+    const { setmanager } = useContext(servercontext)
 
     return (
         <> <motion.nav
@@ -24,22 +26,15 @@ function ChannelMenu() {
             <motion.div className="background" />
             <button onClick={toggleOpen}><FontAwesomeIcon size="2x" icon={faEllipsisVertical} /></button>
 
-            <motion.ul variants={variants}>
+            <motion.ul variants={variants} >
 
                 <motion.li
                     variants={itemvariants}
                     whileTap={{ scale: 0.95 }}
                 >
                     <div className="icon-placeholder" />
-                    <div className="text-placeholder" onClick={() => setdialog(0)} >view channel info</div>
-                </motion.li>
-                <motion.li
-                    variants={itemvariants}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    <div className="icon-placeholder" />
                     <div className="text-placeholder" onClick={() => {
-                        setdialog(1)
+                        setmanager(true)
                         toggleOpen()
                     }}>manage channel</div>
                 </motion.li>
@@ -57,10 +52,20 @@ function ChannelMenu() {
 
 
 export default function Serverheader({ setsearchfolder }) {
-
+    const { setdialog, serverinfo } = useContext(servercontext)
     return (
         <div className="serverheader">
-            ff
+
+
+            <div className="serverinfo">
+
+                <ServerAvatar server={serverinfo} />
+                <div className="info">
+                    <h3>{serverinfo.name}</h3>
+                    <span>{serverinfo.shortdesc}</span>
+                </div>
+            </div>
+
             <div className="tools">
 
                 <button><FontAwesomeIcon size="2x" icon={faSearch} onClick={() => setsearchfolder(true)} /></button>

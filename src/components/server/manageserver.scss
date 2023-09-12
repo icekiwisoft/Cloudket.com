@@ -1,0 +1,105 @@
+.servermanager {
+  position: fixed;
+  width: 100vw;
+
+  .serverinfosettings {
+    .avatar {
+      max-width: 150px;
+      min-width: 150px;
+      max-height: 150px;
+      min-height: 150px;
+    }
+  }
+
+  height: 100vh;
+  background-color: var(--room-background-color);
+  display: flex;
+  .closebutton {
+    width: 50px;
+    height: 50px;
+    margin-top: 50px;
+
+    border-radius: 50px;
+    color: var(--text-color4);
+    border: 2px solid var(--text-color4);
+  }
+  aside {
+    width: 300px;
+    height: 100%;
+    background-color: var(--sidebar-color);
+    padding: 0 10px;
+    .menu {
+      right: 0;
+      position: absolute;
+      margin-top: 50px;
+      padding: 10px;
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      button {
+        width: 200px;
+        text-align: left;
+        font-size: 1.1rem;
+        font-weight: 600;
+        height: 40px;
+        padding-left: 10px;
+        color: var(--text-color4);
+        background-color: transparent;
+        color: var(--text-color4);
+        &.active {
+          background-color: var(--active-server-item-color);
+        }
+      }
+    }
+  }
+}
+.currentmanager {
+  padding: 50px;
+  width: 700px;
+  height: 100%;
+
+  .form-input {
+    margin: 8px 0;
+    width: 100%;
+    line-height: 1.9rem;
+    display: flex;
+    flex-direction: column;
+
+    label {
+      color: var(--text-color4);
+    }
+
+    input {
+      width: 100%;
+      height: 50px;
+    }
+  }
+  .save {
+    position: absolute;
+    background: var(--sidebar-color);
+    padding: 20px 30px;
+    display: flex;
+    bottom: 0;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+
+    color: var(--text-color2);
+    button {
+      padding: 10px 20px;
+      width: 200px;
+      background-color: #2b52ff;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+  .form-group {
+    display: flex;
+    margin: 10px 0;
+    align-content: space-between;
+    width: 100%;
+  }
+}

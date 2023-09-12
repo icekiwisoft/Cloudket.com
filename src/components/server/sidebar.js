@@ -12,6 +12,7 @@ import { Link, NavLink, useNavigate, useParams } from "react-router-dom"
 import { motion, useCycle } from "framer-motion"
 import useAxios, { baseURL } from "../../utils/useAxios"
 import AuthContext from "../../context/authcontext"
+import { ServerAvatar } from "./utils"
 
 const sidebar = {
   open: (height = 1000) => ({
@@ -156,7 +157,7 @@ function UserMenu() {
     >
       <motion.div className="background" variants={sidebar} />
       < MenuToggle toggle={() => toggleOpen()} />
-      <motion.ul variants={variants}>
+      <motion.ul className={"usermenu"} variants={variants}>
 
         <motion.li
           variants={itemvariants}
@@ -395,34 +396,11 @@ export default function ServerNavigation(props) {
           (
             servers.length > 0 ?
               servers.map((s) => {
-                var charcode = s.name.toLowerCase().charCodeAt(0)
-                var color;
 
-                if (charcode <= 102)
-                  color = "#219642"
-                else if (charcode <= 116)
-                  color = "#0063c0"
-                else if (charcode <= 120)
-                  color = "green"
-                else
-                  color = "#F85528"
-                console.log(`charcode ${charcode}`)
 
                 return (
                   <NavLink to={`/${s.id}`} className="item">
-                    <div className="avatar">
-                      {
-                        s.icon ?
-                          (<img src={baseURL + s.icon} alt="o" />) :
-
-
-                          (<div className="avatar-img default" style={{ backgroundColor: color }}>
-                            {s.name[0]}
-                          </div>)
-
-
-
-                      }                  </div>
+                    <ServerAvatar server={s} />
 
                     <div className="info">
                       <h3>{s.name}</h3>
@@ -438,7 +416,7 @@ export default function ServerNavigation(props) {
               (
                 <div className="informations" style={{ margin: "auto" }}>
                   <div className="noservers">
-                    <img src={nothing} />
+                    <img src={nothing} alt={"there is nothing"} />
                     <span>bro there is nothing there</span>
                   </div>
 

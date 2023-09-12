@@ -39,6 +39,10 @@
     video {
       margin: auto;
       width: 100%;
+      outline: 0;
+      &:focus {
+        outline: 0;
+      }
     }
   }
 
@@ -64,16 +68,8 @@
     padding: 10px;
   }
 
-  .controlsIcon {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-  }
-
-  .controlsIcon--small {
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
+  .icon.active {
+    color: var(--active-server-item-color);
   }
 
   /* The time controls section */

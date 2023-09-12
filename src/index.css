@@ -9,22 +9,43 @@
   --text-color2: #ddd;
   --text-color3: #e6e6e6;
   --text-color4: #e4e4e4;
+  --text-color5: #d4d4d4;
   --border-color-1: #111;
   --main-col1: #ff004455;
-  --active-server-item-color: rgb(0, 139, 204);
-  --hover-server-item-color: #29292963;
+  --active-server-item-color: rgb(44, 97, 146);
+  --hover-server-item-color: #54545546;
   --setting-popup-bg: #3335;
-  --input-bg-color: #222;
-  --input-border-color: #222;
+  --input-bg-color: #223849;
+  --input-border-color: #1c2a35;
   --input-bs-color: #ff005d;
   --folder-hover-color: #ff004455;
-  --room-background: url(assets/defaultback.jpg);
   --room-background-color: #131d27;
   --option-btn-color: #fffa;
   --hover-option-btn-bg-color: #222;
   --dialog-part-color: #050505;
 }
 
+button {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+input {
+  color: var(--text-color2);
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--input-border-color);
+
+  padding: 8px;
+  outline: 0;
+
+  &:focus {
+    border: 2px solid --input-border-color;
+    box-shadow: 0 0 5px --input-border-color;
+  }
+}
 
 ::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
@@ -58,7 +79,7 @@ button {
   --sidebar-color: #fafafa;
   --dialog-part-color: #fff;
   --room-background-color: #fff;
-
+  --text-color5: #222222;
   --room-color: #cacaca;
   --setting-popup-bg: rgba(255, 255, 255, 0.603);
   --text-color1: #333;
@@ -72,7 +93,6 @@ button {
   --folder-hover-color: #006eff55;
   --hover-server-item-color: #e7e7e763;
   --active-server-item-color: rgb(51, 144, 236);
-  --room-background: url(assets/light.png);
   --option-btn-color: #222;
   --hover-option-btn-bg-color: #d6d6d6;
 }
