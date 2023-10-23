@@ -1,18 +1,18 @@
-import { faAdd, faSearch, faUser } from "@fortawesome/free-solid-svg-icons"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import foldericon from '../../assets/folder.png'
+import imageicon from '../../assets/image.png'
+import nothing from '../../assets/nothing.png'
 import texticon from '../../assets/text.png'
 import videoicon from '../../assets/video.png'
-import imageicon from '../../assets/image.png'
 import wordicon from '../../assets/word.png'
-import nothing from '../../assets/nothing.png'
 
-import { useContext, useEffect, useRef, useState } from "react"
-import { Link, NavLink, useNavigate, useParams } from "react-router-dom"
 import { motion, useCycle } from "framer-motion"
-import useAxios, { baseURL } from "../../utils/useAxios"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { NavLink, useNavigate, useParams } from "react-router-dom"
 import AuthContext from "../../context/authcontext"
-import { ServerAvatar } from "./utils"
+import useAxios, { baseURL } from "../../utils/useAxios"
+import { ServerAvatar } from "../server/utils"
+import Server from '../../interfaces/server.interfaces'
+import "./sidebar.scss"
 
 const sidebar = {
   open: (height = 1000) => ({
@@ -45,7 +45,7 @@ export const Path = props => (
 );
 
 export const MenuToggle = ({ toggle }) => (
-  <button onClick={toggle}
+  <button title='' onClick={toggle}
   >
     <svg width="23" height="23" viewBox="0 0 23 23">
       <Path
@@ -108,7 +108,7 @@ export const itemvariants = {
 
 function CreateServerDialog({ setaddserver }) {
   const axios = useAxios()
-  const [name, setname] = useState("")
+  const [name, setname] = useState<string>()
 
   const handleclose = (e) => {
     e.stopPropagation()
@@ -203,10 +203,10 @@ function UserMenu() {
 }
 
 function FolderNavigation(props) {
-  const [folderlist, setfolderlist] = useState([])
+  const [itemlist, setitemlist] = useState<ServerItem[]>([])
   const [filelist, setfilelist] = useState([])
-  const [searchvalue, setsearchvalue] = useState("")
-  const [serverinfo, setserverinfo] = useState({})
+  const [searchvalue, setsearchvalue] = useState<string>("")
+  const [serverinfo, setserverinfo] = useState<Server>()
   const { id } = useParams()
   const axios = useAxios()
   const { setsearchfolder } = props
@@ -230,22 +230,14 @@ function FolderNavigation(props) {
       par["name"] = val
     }
 
-    console.log(par)
     setsearchvalue(e.target.value)
-    axios.get(`${baseURL}/${id}/folders`, {
+    axios.get(`${baseURL}/${id}/items`, {
       params: par
     }).then(result => {
-      setfolderlist(result.data)
-    })
-
-    axios.get(`${baseURL}/${id}/files`, {
-      params: par
-    }).then(result => {
-      setfilelist(result.data)
+      setitemlist(result.data)
     })
 
   }
-
 
 
   const update =
@@ -268,10 +260,10 @@ function FolderNavigation(props) {
 
       <div className="serverinsearch">
         <div className="item f">
-          <img src={`${baseURL} + ${serverinfo.icon}`} />
+          <img src={`${baseURL} + ${serverinfo!.icon}`} />
           <div className="info">
-            <h3>{serverinfo.name}</h3>
-            <span>{serverinfo.shortdesc}</span>
+            <h3>{serverinfo!.name}</h3>
+            <span>{serverinfo!.shortdesc}</span>
           </div>
           <button onClick={() => setsearchfolder(false)}>
             <svg width="23" height="23" viewBox="0 0 23 23">
@@ -298,52 +290,10 @@ function FolderNavigation(props) {
       <div className="folderlist">
 
         {
-          folderlist.map((f) => {
+          itemlist.map((item) => {
 
             return (
-              <NavLink to={`/${id}/${f.id}`} className="item f">
-                <img src={foldericon} />
-                <div className="info">
-                  <h3>{f.name}</h3>
-                  <span>{f.author.username}</span>
-                </div>
-                <div>
-                </div>
-              </NavLink>
-            )
-          })
-        }
-
-
-        {
-          filelist.map((f) => {
-
-
-
-            var icon
-
-            if (f.type.includes("video")) {
-              icon = videoicon
-            }
-            else if (f.type.includes("image")) {
-              icon = imageicon
-            }
-            else if (f.type.includes("word")) {
-              icon = wordicon
-            }
-            else {
-              icon = texticon
-            }
-            return (
-              <NavLink to={`/${id}/${f.id}`} className="item f">
-                <img src={icon} />
-                <div className="info">
-                  <h3>{f.name}</h3>
-                  <span>{f.author.username}</span>
-                </div>
-                <div>
-                </div>
-              </NavLink>
+              <></>
             )
           })
         }
@@ -355,9 +305,9 @@ function FolderNavigation(props) {
 
 export default function ServerNavigation(props) {
   const axios = useAxios()
-  const [servers, setservers] = useState([])
-  const [searchvalue, setsearchvalue] = useState("")
-  const [searchserver, setsearchserver] = useState([])
+  const [servers, setservers] = useState<Server[]>([])
+  const [searchvalue, setsearchvalue] = useState<string>("")
+  const [searchserver, setsearchserver] = useState<Server[]>([])
   const { searchfolder, setsearchfolder } = props
   console.log(searchfolder)
   const update = async () => {
@@ -367,8 +317,6 @@ export default function ServerNavigation(props) {
 
   }
 
-
-
   const onsearchvalue = e => {
     setsearchvalue(e.target.value)
     axios.get(`${baseURL}?name=${e.target.value}`).then(result => {
@@ -377,6 +325,10 @@ export default function ServerNavigation(props) {
 
   }
 
+  useEffect(() => {
+    update()
+  }
+    , [])
 
 
   useEffect(() => {

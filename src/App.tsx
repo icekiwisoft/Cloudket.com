@@ -6,6 +6,7 @@ import Register from './pages/register';
 import PrivateRoute from './utils/PrivateRoute';
 import { AuthProvider } from './context/authcontext';
 import Logout from './pages/logout';
+import React from 'react';
 
 function App() {
   return (

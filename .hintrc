@@ -18,6 +18,7 @@
           "backdrop-filter"
         ]
       }
-    ]
+    ],
+    "no-inline-styles": "off"
   }
 }

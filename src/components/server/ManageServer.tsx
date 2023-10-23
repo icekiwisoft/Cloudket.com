@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { servercontext } from "./serverroom"
+import { servercontext } from "./Room/serverroom"
 import useAxios, { baseURL } from "../../utils/useAxios"
 import { ServerAvatar, UserAvatar } from "./utils"
 import "./manageserver.scss"

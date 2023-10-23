@@ -1,4 +1,27 @@
 import { baseURL } from "../../utils/useAxios";
+import foldericon from '../../assets/folder.png'
+import texticon from '../../assets/text.png'
+import wordicon from '../../assets/word.png'
+
+export function getitemicon(item: ServerItem) {
+    let icon = foldericon
+
+
+    if (item.type === "file") {
+        if (item.filetype.includes("video") || item.filetype.includes("image")) {
+            icon = baseURL + item.thumbnail
+        }
+
+        else if (item.filetype.includes("word")) {
+            icon = wordicon
+        }
+        else {
+            icon = texticon
+        }
+    }
+
+    return icon
+}
 
 export function ServerAvatar({ server }) {
     var charcode = server.name.toLowerCase().charCodeAt(0)
@@ -55,6 +78,9 @@ export function UserAvatar({ user }) {
                     (<div className="avatar-img default" style={{ backgroundColor: color }}>
                         {user.username[0]}
                     </div>)
+
+
+
 
 
 

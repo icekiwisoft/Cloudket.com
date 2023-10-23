@@ -14,7 +14,7 @@ import { faAngleLeft, faAngleRight, faAnglesLeft } from "@fortawesome/free-solid
 export const playercontext = createContext()
 
 
-const Player = (props) => {
+export default function Player(props) {
 
     const { setfile, file, files } = props
 
@@ -75,4 +75,3 @@ const Player = (props) => {
     )
 }
 
-export default Player;

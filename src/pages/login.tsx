@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import Logo from '../assets/icon.png'
 
 import './login.scss'
@@ -27,10 +27,8 @@ export default function Login() {
                     <div className='loginwrapper'>
                         <div className='logo-wrapper'>
                             <img src={Logo} alt='nest' />
-
                         </div>
                         <form onSubmit={handleSubmit}>
-
                             <div className='login-text'>
                                 <h2>welcome back</h2>
                                 <span>
@@ -41,19 +39,14 @@ export default function Login() {
                                 <label>email or username</label>
                                 <input id="email" type='text' />
                             </div>
-
                             <div className='form-input'>
                                 <label>password</label>
                                 <input id="password" type='password' />
-
                             </div>
                             <button>login</button>
                             <span className='register-text'>you don't have an account <Link to={'/register'}>register Now</Link></span>
-
                         </form>
-
                     </div>
-
                 </div>
             }
 

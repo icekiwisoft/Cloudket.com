@@ -1,6 +1,6 @@
-import { useContext, useState } from "react";
-import ServerNavigation, { Settings } from "../components/server/sidebar";
-import ServerRoom from "../components/server/serverroom";
+import React, { useContext, useState } from "react";
+import ServerRoom from "../components/server/Room/serverroom";
+import ServerNavigation from "../components/sidebar/sidebar";
 import AuthContext from "../context/authcontext";
 export default function Server() {
     const [searchfolder, setsearchfolder] = useState(false)
@@ -9,7 +9,6 @@ export default function Server() {
         <div className={"content" + ((theme) ? " light" : '')}>
             <ServerNavigation searchfolder={searchfolder} setsearchfolder={setsearchfolder} />
             <ServerRoom setsearchfolder={setsearchfolder} />
-
         </div>
     )
 }

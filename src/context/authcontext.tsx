@@ -1,26 +1,30 @@
-import { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import jwt_decode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../utils/useAxios";
 
-const AuthContext = createContext();
+const AuthContext = createContext<any>(null);
 
 export default AuthContext;
 
+interface AuthTokens {
+    refresh: string
+    access: string
+}
+
 export const AuthProvider = ({ children }) => {
-    const [authTokens, setAuthTokens] = useState(() =>
+    const [authTokens, setAuthTokens] = useState<AuthTokens | null>(() =>
         localStorage.getItem("authTokens")
-            ? JSON.parse(localStorage.getItem("authTokens"))
+            ? JSON.parse(`${localStorage.getItem("authTokens")}`)
             : null
     );
 
 
-    console.log(Boolean(localStorage.getItem("theme")))
+    const [theme, settheme] = useState<boolean>(() => (JSON.parse(`${localStorage.getItem("theme")}`)))
 
-    const [theme, settheme] = useState(() => (JSON.parse(localStorage.getItem("theme"))))
     const [user, setUser] = useState(() =>
         localStorage.getItem("authTokens")
-            ? jwt_decode(localStorage.getItem("authTokens"))
+            ? jwt_decode(`${localStorage.getItem("authTokens")}`)
             : null
     );
     const [loading, setLoading] = useState(true);
@@ -51,7 +55,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const changetheme = () => {
-        localStorage.setItem("theme", theme === false);
+        localStorage.setItem("theme", (theme === false).toString());
         settheme(theme === false);
 
     }
